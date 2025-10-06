@@ -2,8 +2,6 @@
 
 from crewai import Agent
 
-from crewai import Agent
-
 class ReasoningAgent(Agent):
     def __init__(self):
         super().__init__(
@@ -14,5 +12,15 @@ class ReasoningAgent(Agent):
         )
 
     def run(self, detection_result: dict):
-        print(f"[ReasoningAgent] Received: {detection_result}")
-        return {"summary": "Reasoning placeholder"}
+        status = detection_result.get("status", "Unknown")
+        if status == "Attack":
+            summary = "High-risk event detected. Possible malicious communication. Recommend blocking source IP and isolating host."
+        elif status == "Benign":
+            summary = "No malicious behavior found. Monitoring continues."
+        elif status == "Unknown":
+            summary = "Unable to analyze log due to missing model or data."
+        else:
+            summary = "Unexpected status; manual review required."
+
+        print(f"[ReasoningAgent] {summary}")
+        return {"summary": summary}

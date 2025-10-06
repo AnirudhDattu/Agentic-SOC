@@ -1,6 +1,9 @@
 # agents/detection_agent.py
 
 from crewai import Agent
+import joblib
+import pandas as pd
+import os
 
 class DetectionAgent(Agent):
     def __init__(self):
@@ -11,7 +14,30 @@ class DetectionAgent(Agent):
             backstory="You are an AI analyst trained to recognize attack patterns and anomalies in system logs."
         )
 
-    def run(self, log_data: dict):
-        print(f"[DetectionAgent] Processing log: {log_data}")
-        return {"status": "Pending", "details": "Detection logic not yet implemented"}
+        model_path = "models/detector.pkl"
+        if os.path.exists(model_path):
+            model = joblib.load(model_path)
+            # Assign safely without triggering Pydantic restrictions
+            object.__setattr__(self, "_model", model)
+            print("[DetectionAgent] ✅ Model loaded successfully.")
+        else:
+            object.__setattr__(self, "_model", None)
+            print("[DetectionAgent] ⚠️ Model not found, using mock mode.")
 
+    def run(self, log_data: dict):
+        model = getattr(self, "_model", None)
+
+        if model is None:
+            print("[DetectionAgent] ⚠️ No model available.")
+            return {"status": "Unknown", "details": "Model not loaded"}
+
+        try:
+            df = pd.DataFrame([log_data])[['dur','spkts','dpkts']]
+            pred = model.predict(df)[0]
+            status = "Attack" if pred == 1 else "Benign"
+            print(f"[DetectionAgent] {status} detected for log: {log_data}")
+            return {"status": status}
+
+        except Exception as e:
+            print("[DetectionAgent] Error:", e)
+            return {"status": "Error", "details": str(e)}
