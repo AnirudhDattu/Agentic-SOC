@@ -14,10 +14,16 @@ while True:
         with open("infra/live_log.json") as f:
             log = json.load(f)
 
+        # run agents sequentially
         d = detector.run(log)
         r = reasoner.run(d)
         a = responder.run(r)
 
-        print(f"\n[Pipeline] Log→{d['status']} → {r['summary']} → {a['action']}\n")
+        # extract clean info
+        attack_type = r.get("attack_type", "None")
+        severity = r.get("severity", "Low")
+        rec = r.get("recommendation", "No details")
+
+        print(f"\n[Pipeline] {d['status']} → {attack_type} ({severity}) → {rec} → {a['action']}\n")
 
     time.sleep(2)

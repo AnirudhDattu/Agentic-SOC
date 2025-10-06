@@ -7,27 +7,38 @@ class ResponseAgent(Agent):
     def __init__(self):
         super().__init__(
             name="ResponseAgent",
-            role="Executes defensive actions and logs outcomes.",
-            goal="Perform immediate mitigations based on reasoning output.",
-            backstory="You are an automated security operator responsible for neutralizing detected threats."
+            role="Automated defender",
+            goal="Take defensive actions based on reasoning results.",
+            backstory="You are an AI defender acting on attack intelligence."
         )
 
     def run(self, reasoning_result: dict):
-        action = "None"
-        if "High-risk" in reasoning_result["summary"]:
-            action = "Blocked source IP (simulated)"
-        elif "No malicious" in reasoning_result["summary"]:
-            action = "No action required"
-        elif "Unable" in reasoning_result["summary"]:
-            action = "Manual investigation needed"
+        attack = reasoning_result.get("attack_type", "Unknown")
+        severity = reasoning_result.get("severity", "Medium")
+        recommendation = reasoning_result.get("recommendation", "")
+        action = "Logged incident"
+
+        if attack == "DDoS":
+            action = "Throttled network traffic"
+        elif attack == "Port Scan":
+            action = "Blocked IP range"
+        elif attack == "Brute Force":
+            action = "Locked account"
+        elif attack == "Exploit":
+            action = "Isolated host"
+        elif attack == "Data Exfiltration":
+            action = "Terminated outbound connections"
 
         log_entry = {
             "time": str(datetime.datetime.now()),
-            "action": action,
-            "summary": reasoning_result["summary"]
+            "attack_type": attack,
+            "severity": severity,
+            "recommendation": recommendation,
+            "action": action
         }
-        with open("infra/action_log.json", "a") as f:
+
+        with open("infra/action_log.json", "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry) + "\n")
 
-        print(f"[ResponseAgent] {action}")
+        print(f"[ResponseAgent] {attack} ({severity}) → {action}")
         return {"action": action}
