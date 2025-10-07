@@ -21,7 +21,7 @@ def run_main():
 def run_dashboard():
     print("\n[Launcher] Starting Dashboard ...")
     # Streamlit must be called as module for UI
-    os.system("streamlit run app/dashboard.py --server.headless=true --server.runOnSave=false")
+    os.system("streamlit run app/dashboard2.py  --server.runOnSave=false")
 
 # create threads
 threads = [

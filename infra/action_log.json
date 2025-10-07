@@ -92,3 +92,44 @@
 {"time": "2025-10-07 16:01:47.911710", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
 {"time": "2025-10-07 16:01:49.987670", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
 {"time": "2025-10-07 16:01:52.011185", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:48:21.072121", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:48:23.101705", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:48:25.147290", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:48:37.462323", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Immediately block the source IP address and review firewall rules.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:48:46.561996", "attack_type": "Exploit", "severity": "High", "recommendation": "Isolate and further analyze the affected system.", "action": "Isolated host"}
+{"time": "2025-10-07 16:48:48.589531", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:48:50.603448", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:48:59.753199", "attack_type": "Exploit", "severity": "High", "recommendation": "Immediately isolate the affected system to prevent further exploitation.", "action": "Isolated host"}
+{"time": "2025-10-07 16:49:01.772077", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:49:03.796693", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:49:13.434068", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately initiate traffic filtering and rate limiting on the suspected source.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 16:49:15.452457", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:49:17.471823", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:49:19.495815", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:49:29.785462", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Implement rate limiting on incoming connections.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:49:38.697458", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Immediately block the source IP in firewall settings.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:49:40.716958", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:49:49.602788", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately inspect and isolate the source IP address.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 16:51:49.632692", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately reroute traffic and apply rate limiting.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 16:54:01.192009", "attack_type": "Unknown", "severity": "Medium", "recommendation": "Monitor and escalate if anomalies persist.", "action": "Logged incident"}
+{"time": "2025-10-07 16:54:03.222843", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:54:14.156335", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Initiate a blocking rule for the suspicious source IP address.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:54:24.222671", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Monitor the source IP address for further suspicious activity.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:54:35.471785", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Immediately update firewall rules to block the source IP.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:54:37.505926", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:54:39.543674", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:54:51.031385", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Implement a rate-based firewall rule to limit the number of packets from any source in short durations.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:56:26.438300", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Implement rate limiting for port scanning attempts.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:56:28.462442", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:56:39.035257", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Implement a time-based firewall rule to block port scans.", "action": "Blocked IP range"}
+{"time": "2025-10-07 16:56:41.069749", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:57:23.065466", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately inspect the source IP and block it if necessary.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 16:57:25.105866", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:57:27.174763", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 16:59:26.524207", "attack_type": "Unknown", "severity": "Medium", "recommendation": "Monitor and escalate if anomalies persist.", "action": "Logged incident"}
+{"time": "2025-10-07 16:59:38.219629", "attack_type": "Exploit", "severity": "High", "recommendation": "Immediately isolate affected systems and begin forensic analysis.", "action": "Isolated host"}
+{"time": "2025-10-07 16:59:50.328203", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately block the source IP address to mitigate the attack.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 17:00:03.168215", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately block the source IP and activate DDoS mitigation protocols.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 17:00:05.188689", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 17:00:18.374618", "attack_type": "Port Scan", "severity": "Low", "recommendation": "Immediately block the source IP address and investigate further.", "action": "Blocked IP range"}
+{"time": "2025-10-07 17:00:30.834817", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately activate DDoS mitigation protocols.", "action": "Throttled network traffic"}
