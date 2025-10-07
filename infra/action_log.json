@@ -1,13 +1,5 @@
-{"time": "2025-10-07 03:08:56.656845", "attack_type": "DDoS", "severity": "High", "recommendation": "Implement rate limiting and consider using a DDoS mitigation service.", "action": "Throttled network traffic"}
-{"time": "2025-10-07 03:09:08.136042", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately engage DDoS mitigation strategies and review traffic patterns to identify the source.", "action": "Throttled network traffic"}
-{"time": "2025-10-07 03:09:10.144176", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
-{"time": "2025-10-07 03:09:19.900157", "attack_type": "DDoS", "severity": "High", "recommendation": "Implement rate limiting and deploy a web application firewall.", "action": "Throttled network traffic"}
-{"time": "2025-10-07 03:09:29.933552", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately activate DDoS mitigation measures and contact the ISP for assistance.", "action": "Throttled network traffic"}
-{"time": "2025-10-07 03:09:39.487901", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately engage DDoS mitigation services and review traffic for anomalies.", "action": "Throttled network traffic"}
-{"time": "2025-10-07 03:09:49.077870", "attack_type": "Unknown", "severity": "Medium", "recommendation": "LLM parsing error: Extra data: line 9 column 1 (char 144)", "action": "Logged incident"}
-{"time": "2025-10-07 03:10:00.326296", "attack_type": "DDoS", "severity": "High", "recommendation": "Implement rate limiting and DDoS mitigation services immediately.", "action": "Throttled network traffic"}
-{"time": "2025-10-07 03:10:02.333675", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
-{"time": "2025-10-07 03:10:04.338833", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
-{"time": "2025-10-07 03:10:06.344798", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
-{"time": "2025-10-07 03:10:08.350053", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
-{"time": "2025-10-07 03:10:10.354203", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 13:04:19.178892", "attack_type": "DDoS", "severity": "High", "recommendation": "Implement rate limiting and filtering to mitigate the DDoS attack.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 13:04:34.094561", "attack_type": "DDoS", "severity": "High", "recommendation": "Implement rate limiting and filtering based on traffic patterns.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 13:04:36.134696", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}
+{"time": "2025-10-07 13:04:53.755717", "attack_type": "DDoS", "severity": "High", "recommendation": "Immediately isolate the affected network segment to mitigate further traffic congestion.", "action": "Throttled network traffic"}
+{"time": "2025-10-07 13:04:55.776812", "attack_type": "None", "severity": "Low", "recommendation": "No threat detected. Continue monitoring.", "action": "Logged incident"}

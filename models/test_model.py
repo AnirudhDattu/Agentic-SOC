@@ -1,3 +1,4 @@
+# models/test_model.py
 import pandas as pd
 import joblib
 from sklearn.metrics import accuracy_score, classification_report
@@ -9,7 +10,13 @@ model = joblib.load("models/detector.pkl")
 df_test = pd.read_csv("data/UNSW_NB15_testing-set.csv")
 
 # Use same columns as training
-X_test = df_test[['dur','spkts','dpkts']]
+feature_cols = [
+    'dur', 'spkts', 'dpkts', 'sbytes', 'dbytes', 'sttl', 'dttl',
+    'sload', 'dload', 'sinpkt', 'dinpkt', 'sjit', 'djit',
+    'swin', 'stcpb', 'dtcpb', 'ct_srv_src', 'ct_srv_dst', 'ct_dst_sport_ltm'
+]
+
+X_test = df_test[feature_cols]
 y_test = df_test['label']
 
 # Run predictions

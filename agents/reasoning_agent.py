@@ -1,5 +1,4 @@
 # agents/reasoning_agent.py
-
 from crewai import Agent
 import ollama
 import json
@@ -22,33 +21,55 @@ class ReasoningAgent(Agent):
             }
 
         prompt = f"""
-        You are a cybersecurity expert.
-        A network log was detected as an attack:
-        {detection_result}
+You are a cybersecurity expert analyzing live network logs.
+Here is one suspicious log entry detected by the AI model:
 
-        You must respond **only** in this JSON format (no code blocks, no text):
-        {{
-            "attack_type": "<one of: DDoS, Port Scan, Brute Force, Exploit, Data Exfiltration, Unknown>",
-            "severity": "<Low, Medium, High>",
-            "recommendation": "<one short sentence on what to do>"
-        }}
-        """
+{json.dumps(detection_result, indent=2)}
+
+Based on duration (dur), source packets (spkts), destination packets (dpkts), and traffic patterns,
+decide what kind of attack it most likely is.
+
+Respond ONLY in valid JSON:
+{{
+  "attack_type": "<DDoS, Port Scan, Brute Force, Exploit, Data Exfiltration, Unknown>",
+  "severity": "<Low, Medium, High>",
+  "recommendation": "<one actionable short sentence>"
+}}
+"""
+
 
         try:
             response = ollama.chat(model="phi3", messages=[{"role": "user", "content": prompt}])
-            text = response["message"]["content"]
+            text = response.message.content.strip()
 
-            # sanitize: remove code fences if model adds them
-            text = text.replace("```json", "").replace("```", "").strip()
+            # Try to extract JSON if LLM adds prose
+            start = text.find("{")
+            end = text.rfind("}") + 1
+            if start != -1 and end != -1:
+                text = text[start:end]
 
-            # parse structured JSON output
             parsed = json.loads(text)
+            dur = float(detection_result.get("dur", 0))
+            spkts = float(detection_result.get("spkts", 0))
+            dpkts = float(detection_result.get("dpkts", 0))
+
+            if parsed["attack_type"] == "Unknown":
+                if spkts > 300 and dpkts > 300:
+                    parsed["attack_type"] = "Port Scan"
+                elif spkts > 50 and dur < 0.5:
+                    parsed["attack_type"] = "Brute Force"
+                elif dur > 20 and dpkts < 10:
+                    parsed["attack_type"] = "Data Exfiltration"
+                elif dur > 5 and spkts > 1000:
+                    parsed["attack_type"] = "Exploit"
+
+            print(f"[ReasoningAgent] Parsed response: {parsed}")
+            return parsed
+
         except Exception as e:
-            parsed = {
+            print(f"[ReasoningAgent] ⚠️ Parsing error: {e}")
+            return {
                 "attack_type": "Unknown",
                 "severity": "Medium",
-                "recommendation": f"LLM parsing error: {e}"
+                "recommendation": "Fallback: monitor and escalate if anomalies persist."
             }
-
-        print(f"[ReasoningAgent] {parsed}")
-        return parsed

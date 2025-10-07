@@ -1,7 +1,9 @@
+#main.py
 from agents.detection_agent import DetectionAgent
 from agents.reasoning_agent import ReasoningAgent
 from agents.response_agent import ResponseAgent
 import json, time, os
+import requests
 
 detector = DetectionAgent()
 reasoner = ReasoningAgent()
@@ -16,7 +18,7 @@ while True:
 
         # run agents sequentially
         d = detector.run(log)
-        r = reasoner.run(d)
+        r = reasoner.run({**log, **d})
         a = responder.run(r)
 
         # extract clean info

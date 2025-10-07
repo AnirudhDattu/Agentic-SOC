@@ -32,8 +32,19 @@ class DetectionAgent(Agent):
             return {"status": "Unknown", "details": "Model not loaded"}
 
         try:
-            df = pd.DataFrame([log_data])[['dur','spkts','dpkts']]
+            # Ensure input uses model's expected features
+            model_features = getattr(model, "feature_names_in_", None)
+            df = pd.DataFrame([log_data])
+
+            if model_features is not None:
+                # Keep only features model expects
+                missing = [f for f in model_features if f not in df.columns]
+                if missing:
+                    print(f"[DetectionAgent] ⚠️ Missing features in log: {missing}")
+                df = df[[f for f in model_features if f in df.columns]]
+
             pred = model.predict(df)[0]
+
             status = "Attack" if pred == 1 else "Benign"
             print(f"[DetectionAgent] {status} detected for log: {log_data}")
             return {"status": status}
