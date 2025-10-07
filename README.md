@@ -6,27 +6,15 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **An intelligent, multi-agent Security Operations Center (SOC) that leverages Large Language Models (LLMs) for real-time cyber threat detection, reasoning, and automated response.**
+>
+<br>
 
-## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Key Features](#key-features)
-- [Technology Stack](#technology-stack)
-- [System Components](#system-components)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Dataset Information](#dataset-information)
-- [Model Training](#model-training)
-- [Dashboard Features](#dashboard-features)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+<div align="center">
 
----
+## ⭐ Give this repo a star if you found it helpful or used it for your project or coursework! All files from the dataset to code are included! ⭐
+
+</div>
 
 ## 🎯 Overview
 
@@ -59,8 +47,6 @@ Network Logs → Detection Agent → Reasoning Agent → Response Agent → Acti
 3. **Reasoning**: LLM analyzes detected attacks to determine type, severity, and recommendations
 4. **Response**: Automated defensive actions are triggered based on threat classification
 5. **Visualization**: Real-time dashboard displays metrics, charts, and incident reports
-
-![System Architecture](Images/LLMimg.png)
 
 ---
 
@@ -408,13 +394,6 @@ The system uses a carefully selected subset optimized for performance:
 - Performance: `sload`, `dload`, `sinpkt`, `dinpkt`, `sjit`, `djit`
 - Connection context: `ct_srv_src`, `ct_srv_dst`, `ct_dst_sport_ltm`
 
-**Citation**:
-```
-Moustafa, N., & Slay, J. (2015). UNSW-NB15: a comprehensive data set for 
-network intrusion detection systems. Military Communications and Information 
-Systems Conference (MilCIS), 2015.
-```
-
 ---
 
 ## 🎓 Model Training
@@ -457,21 +436,10 @@ python models/test_model.py
 - **Recall**: Balanced for both classes
 - **F1-Score**: Strong overall performance
 
-### Retraining
-
-To retrain with different parameters or updated data:
-1. Modify hyperparameters in `models/train_model.py`
-2. Update feature selection if needed
-3. Run training script
-4. Restart the SOC system
-
----
 
 ## 📈 Dashboard Features
 
 ### Overview Tab (📊)
-
-![Dashboard Overview](Images/Dashboard1.png)
 
 **Metrics Displayed**:
 - **Total Incidents**: Count of all logged events
@@ -492,13 +460,9 @@ To retrain with different parameters or updated data:
 
 ### Geo Map Tab (🌍)
 
-![Geo Map](Images/Dashboard2.png)
-
 *Simulated geographical visualization of attack sources*
 
 ### LLM Chat Tab (🧠)
-
-![LLM Chat](Images/Dashboard3.png)
 
 - Interactive chat interface with the Phi-3 model
 - Query historical incidents
@@ -562,87 +526,6 @@ Customize agent prompts and rules in respective files:
 
 ---
 
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### 1. Ollama Connection Failed
-**Error**: `Connection to Ollama failed`
-
-**Solution**:
-```bash
-# Check if Ollama is running
-ollama list
-
-# Start Ollama service (if needed)
-ollama serve
-
-# Pull the model again
-ollama pull phi3
-```
-
-#### 2. Model Not Found
-**Error**: `[DetectionAgent] ⚠️ Model not found, using mock mode.`
-
-**Solution**:
-```bash
-# Train the model
-python models/train_model.py
-
-# Verify model exists
-ls models/detector.pkl
-```
-
-#### 3. Missing Dataset
-**Error**: `FileNotFoundError: data/network_logs.csv`
-
-**Solution**:
-- Ensure the UNSW-NB15 dataset is placed in `data/` directory
-- Download from [official source](https://research.unsw.edu.au/projects/unsw-nb15-dataset)
-- Verify CSV file has correct column names
-
-#### 4. Dashboard Not Loading
-**Error**: Dashboard stuck on "Please wait..."
-
-**Solution**:
-```bash
-# Ensure main.py and log_streamer.py are running
-ps aux | grep python
-
-# Check action_log.json exists
-ls infra/action_log.json
-
-# Clean logs if corrupted
-python infra/clean_logs.py
-```
-
-#### 5. Import Errors
-**Error**: `ModuleNotFoundError: No module named 'crewai'`
-
-**Solution**:
-```bash
-# Reinstall dependencies
-pip install -r requirements.txt --upgrade
-
-# Verify installation
-pip list | grep crewai
-```
-
-### Performance Optimization
-
-**For Faster Inference**:
-- Use a lighter LLM model (`phi3:mini`)
-- Increase log streaming interval
-- Reduce dashboard refresh rate
-- Limit dashboard entries shown
-
-**For Better Accuracy**:
-- Retrain model with more estimators
-- Fine-tune reasoning heuristics
-- Collect more training data
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Here's how you can help:
@@ -656,61 +539,13 @@ Contributions are welcome! Here's how you can help:
 6. Push: `git push origin feature/amazing-feature`
 7. Open a Pull Request
 
-### Areas for Contribution
-- 🎯 Additional attack type detection
-- 🧠 Alternative LLM integrations
-- 📊 Enhanced dashboard visualizations
-- 🔒 New defensive action implementations
-- 📚 Documentation improvements
-- 🧪 Test coverage expansion
-
-### Code Style
-- Follow PEP 8 guidelines
-- Add docstrings to new functions
-- Include type hints where appropriate
-- Write clear commit messages
-
----
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-## 🙏 Acknowledgments
-
-- **UNSW-NB15 Dataset**: Australian Centre for Cyber Security (ACCS)
-- **CrewAI**: Multi-agent orchestration framework
-- **Ollama**: Local LLM hosting platform
-- **Streamlit**: Dashboard framework
-- **Open Source Community**: For amazing tools and libraries
-
----
-
-## 📧 Contact & Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/AnirudhDattu/Agentic-SOC/issues)
-- **Discussions**: [Ask questions and share ideas](https://github.com/AnirudhDattu/Agentic-SOC/discussions)
-
----
-
-## 🎯 Roadmap
-
-**Upcoming Features**:
-- [ ] Integration with SIEM platforms (Splunk, ELK)
-- [ ] Real-time network packet capture
-- [ ] Multi-model LLM ensemble reasoning
-- [ ] Email/Slack alerting system
-- [ ] Historical threat intelligence database
-- [ ] Advanced forensics capabilities
-- [ ] Kubernetes deployment support
-
----
-
 <div align="center">
 
-**Built with ❤️ by the Agentic SOC Team**
+**Built with ❤️ by Anirudh Dattu**
 
 ⭐ Star this repo if you find it useful! ⭐
 
