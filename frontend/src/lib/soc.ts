@@ -141,7 +141,10 @@ export function toCsv(rows: Incident[]): string {
     ...FEATURE_FIELDS.map((f) => f.key),
   ];
   const escape = (v: unknown) => {
-    const s = v === null || v === undefined ? "" : String(v);
+    let s = v === null || v === undefined ? "" : String(v);
+    // Neutralize CSV formula injection: a leading =, +, -, @, tab, or CR lets
+    // a value execute as a formula when the export is opened in Excel/Sheets.
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = rows.map((r) =>
