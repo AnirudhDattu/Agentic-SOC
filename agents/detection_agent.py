@@ -47,7 +47,7 @@ class DetectionAgent(Agent):
 
             status = "Attack" if pred == 1 else "Benign"
             print(f"[DetectionAgent] {status} detected for log: {log_data}")
-            return {"status": status}
+            return {"status": status, **log_data}
 
         except Exception as e:
             print("[DetectionAgent] Error:", e)

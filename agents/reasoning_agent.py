@@ -1,110 +1,160 @@
 # agents/reasoning_agent.py
-from crewai import Agent
-import ollama
+import os
+
+# Must be set before crewai is imported: without these it (a) tries to phone
+# home for telemetry on a sandboxed network and hangs, and (b) prompts
+# interactively on first run ("enable tracing?" / "view execution traces?"),
+# which blocks a non-interactive pipeline for up to 20s per prompt.
+os.environ.setdefault("CREWAI_DISABLE_TELEMETRY", "true")
+os.environ.setdefault("OTEL_SDK_DISABLED", "true")
+os.environ.setdefault("CREWAI_TESTING", "true")
+
 import json
+from crewai import Agent, Task, Crew, Process
+
+from agents.tools import lookup_similar_incidents
+from infra.rate_limiter import RateLimiter
+
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "groq/llama-3.3-70b-versatile")
+
+# The dataset's real UNSW-NB15 attack categories (see data/network_logs.csv's
+# attack_cat column) — this is ground truth, not a guess, so both the rule
+# fallback and the LLM are told about it rather than reinventing it from the
+# 19 raw numeric features alone.
+VALID_ATTACK_TYPES = {
+    "Generic", "Exploits", "Fuzzers", "DoS", "Reconnaissance",
+    "Analysis", "Backdoor", "Shellcode", "Worms", "Unknown",
+}
+VALID_SEVERITIES = {"Low", "Medium", "High"}
+
+CATEGORY_SEVERITY = {
+    "DoS": "High",
+    "Backdoor": "High",
+    "Shellcode": "High",
+    "Worms": "High",
+    "Exploits": "High",
+    "Generic": "Medium",
+    "Reconnaissance": "Medium",
+    "Analysis": "Low",
+    "Fuzzers": "Low",
+}
+CATEGORY_RECOMMENDATION = {
+    "DoS": "Enable rate limiting and block suspicious IPs.",
+    "Backdoor": "Isolate the affected host and audit for persistence mechanisms.",
+    "Shellcode": "Isolate the affected host and inspect for injected payloads.",
+    "Worms": "Quarantine the host immediately to stop propagation.",
+    "Exploits": "Patch the affected service and isolate the host pending review.",
+    "Generic": "Escalate to a security analyst for manual review.",
+    "Reconnaissance": "Block the scanning IP range and enable IDS alerts.",
+    "Analysis": "Log and monitor; low-risk probing activity.",
+    "Fuzzers": "Block the source IP range and monitor for follow-up attempts.",
+}
+
+# Groq free tier for llama-3.3-70b-versatile: 1,000 requests/day. A single
+# kickoff() can cost more than one request if the agent uses the tool, so
+# stay well under the cap; min_interval also prevents bursts.
+_limiter = RateLimiter(max_per_day=400, min_interval=2.0)
+
 
 class ReasoningAgent(Agent):
     def __init__(self):
         super().__init__(
             name="ReasoningAgent",
             role="LLM-based security analyst",
-            goal="Identify attack type, severity, and recommend mitigation using a local LLM.",
-            backstory="You are an AI SOC analyst reasoning about detected attacks and classifying threats accurately."
+            goal="Identify attack type, severity, and recommend mitigation, grounded in historical incident data.",
+            backstory=(
+                "You are an AI SOC analyst. You reason about detected attacks using the raw "
+                "network flow features and the sensor's signature match, consult the incident "
+                "history tool when it would sharpen your judgment, and always respond with a "
+                "precise classification."
+            ),
+            llm=GROQ_MODEL,
+            tools=[lookup_similar_incidents],
+            verbose=False,
+            max_iter=6,
+            max_rpm=10,
         )
+        if os.environ.get("GROQ_API_KEY"):
+            print(f"[ReasoningAgent] ✅ LLM reasoning enabled ({GROQ_MODEL}).")
+        else:
+            print("[ReasoningAgent] ⚠️ GROQ_API_KEY not set — using rule-based reasoning only.")
 
     def run(self, detection_result: dict):
-        # Skip if not attack
         if detection_result.get("status") != "Attack":
             return {
                 "attack_type": "None",
                 "severity": "Low",
-                "recommendation": "No threat detected. Continue monitoring."
+                "recommendation": "No threat detected. Continue monitoring.",
+                "_method": "rules",
             }
 
-        # ---------- Improved prompt ----------
-        prompt = f"""
-You are a cybersecurity analyst. A network log entry was flagged as a potential attack.
+        llm_result = None
+        if os.environ.get("GROQ_API_KEY"):
+            if _limiter.allow():
+                llm_result = self._ask_llm(detection_result)
+            else:
+                print(
+                    f"[ReasoningAgent] ⏳ Rate limit reached ({_limiter.remaining_today} left today) "
+                    "— using rule-based fallback."
+                )
+
+        parsed = llm_result if llm_result else self._rule_based(detection_result)
+        parsed.setdefault("attack_type", "Unknown")
+        parsed.setdefault("severity", "Medium")
+        parsed.setdefault("recommendation", "No valid reasoning provided.")
+        parsed["_method"] = "llm" if llm_result else "rules"
+        print(f"[ReasoningAgent] Parsed response ({parsed['_method']}): {parsed}")
+        return parsed
+
+    def _ask_llm(self, detection_result: dict):
+        attack_cat = (detection_result.get("attack_cat") or "").strip()
+        signature_hint = attack_cat if attack_cat and attack_cat != "Normal" else "no signature match"
+
+        prompt = f"""A network log entry was flagged as a potential attack by the detection model.
 
 Log details:
 {json.dumps(detection_result, indent=2)}
 
-Use these simple heuristics to infer the most probable attack type:
-- Very short duration (<0.01 s) with very few packets → Port Scan  
-- Many packets from one source in short duration (spkts > 1000, dur < 2) → DDoS  
-- Moderate packets (spkts > 50) and short duration (dur < 0.5 s) → Brute Force  
-- Long duration (dur > 20 s) with few destination packets (dpkts < 10) → Data Exfiltration  
-- Long duration (>5 s) and high packets (>1000) → Exploit  
+The network sensor's signature match suggests category: {signature_hint}.
 
-Respond ONLY in **valid JSON**:
+You may call the lookup_similar_incidents tool with a candidate attack_type to check
+historical context before finalizing your answer.
+
+Respond with ONLY valid JSON, no explanation, no markdown:
 {{
-  "attack_type": "<one of: DDoS, Port Scan, Brute Force, Exploit, Data Exfiltration, Unknown>",
+  "attack_type": "<one of: Generic, Exploits, Fuzzers, DoS, Reconnaissance, Analysis, Backdoor, Shellcode, Worms, Unknown>",
   "severity": "<Low, Medium, High>",
   "recommendation": "<one short actionable sentence>"
-}}
-No explanations, no code, just JSON.
-"""
-
-        # ---------- Query Ollama ----------
+}}"""
         try:
-            response = ollama.chat(model="phi3", messages=[{"role": "user", "content": prompt}])
-            text = response.get("message", {}).get("content", "").strip()
+            task = Task(description=prompt, expected_output="A single JSON object.", agent=self)
+            crew = Crew(agents=[self], tasks=[task], process=Process.sequential, verbose=False)
+            text = str(crew.kickoff()).strip()
 
-            # Extract first valid JSON block if needed
             start, end = text.find("{"), text.rfind("}") + 1
-            json_text = text[start:end] if (start != -1 and end != -1) else "{}"
-            parsed = json.loads(json_text)
+            if start == -1 or end == -1:
+                raise ValueError("no JSON object in LLM response")
+            parsed = json.loads(text[start:end])
+
+            if parsed.get("attack_type") not in VALID_ATTACK_TYPES:
+                parsed["attack_type"] = attack_cat if attack_cat in VALID_ATTACK_TYPES else "Unknown"
+            if parsed.get("severity") not in VALID_SEVERITIES:
+                parsed["severity"] = "Medium"
+            return parsed
         except Exception as e:
-            print(f"[ReasoningAgent] ⚠️ LLM parsing failed: {e}")
-            parsed = {
-                "attack_type": "Unknown",
-                "severity": "Medium",
-                "recommendation": "Monitor and escalate if anomalies persist."
+            print(f"[ReasoningAgent] ⚠️ LLM call failed, falling back to rules: {e}")
+            return None
+
+    def _rule_based(self, detection_result: dict):
+        attack_cat = (detection_result.get("attack_cat") or "").strip()
+        if attack_cat in CATEGORY_SEVERITY:
+            return {
+                "attack_type": attack_cat,
+                "severity": CATEGORY_SEVERITY[attack_cat],
+                "recommendation": CATEGORY_RECOMMENDATION[attack_cat],
             }
-
-        # ---------- Apply rule-based refinement always ----------
-        try:
-            dur = float(detection_result.get("dur", 0))
-            spkts = float(detection_result.get("spkts", 0))
-            dpkts = float(detection_result.get("dpkts", 0))
-
-            # refine based on quantitative behavior
-            if spkts > 1000 and dur < 2:
-                parsed.update({
-                    "attack_type": "DDoS",
-                    "severity": "High",
-                    "recommendation": "Enable rate limiting and block suspicious IPs."
-                })
-            elif spkts > 300 and dpkts > 300 and dur < 1:
-                parsed.update({
-                    "attack_type": "Port Scan",
-                    "severity": "Medium",
-                    "recommendation": "Block scanner IP range and enable IDS alerts."
-                })
-            elif spkts > 50 and dur < 0.5:
-                parsed.update({
-                    "attack_type": "Brute Force",
-                    "severity": "High",
-                    "recommendation": "Lock accounts after multiple failed login attempts."
-                })
-            elif dur > 20 and dpkts < 10:
-                parsed.update({
-                    "attack_type": "Data Exfiltration",
-                    "severity": "High",
-                    "recommendation": "Inspect outbound data flows for leaks."
-                })
-            elif dur > 5 and spkts > 1000:
-                parsed.update({
-                    "attack_type": "Exploit",
-                    "severity": "High",
-                    "recommendation": "Isolate affected host and patch vulnerabilities."
-                })
-
-        except Exception as e:
-            print(f"[ReasoningAgent] ⚠️ Rule-based reasoning error: {e}")
-
-        # ---------- Final cleanup ----------
-        parsed.setdefault("attack_type", "Unknown")
-        parsed.setdefault("severity", "Medium")
-        parsed.setdefault("recommendation", "No valid reasoning provided.")
-        print(f"[ReasoningAgent] Parsed response: {parsed}")
-        return parsed
+        return {
+            "attack_type": "Unknown",
+            "severity": "Medium",
+            "recommendation": "Monitor and escalate if anomalies persist.",
+        }

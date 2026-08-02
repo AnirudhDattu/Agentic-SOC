@@ -1,8 +1,20 @@
 # main.py
+import os
+
+# Must happen before crewai is imported (transitively, via the agents below):
+# without these it hangs trying to phone home for telemetry, and prompts
+# interactively on first run, which blocks this non-interactive loop.
+os.environ.setdefault("CREWAI_DISABLE_TELEMETRY", "true")
+os.environ.setdefault("OTEL_SDK_DISABLED", "true")
+os.environ.setdefault("CREWAI_TESTING", "true")
+
+from dotenv import load_dotenv
+load_dotenv()
+
 from agents.detection_agent import DetectionAgent
 from agents.reasoning_agent import ReasoningAgent
 from agents.response_agent import ResponseAgent
-import json, time, os
+import json, time
 
 # ANSI color codes for pretty console output
 RED = "\033[91m"
@@ -25,7 +37,7 @@ while True:
         # Run agents sequentially
         d = detector.run(log)
         r = reasoner.run(d)
-        a = responder.run(r)
+        a = responder.run(d, r)
 
         attack_type = r.get("attack_type", "None")
         severity = r.get("severity", "Low")
