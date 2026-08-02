@@ -97,24 +97,37 @@ Optional — enable real LLM reasoning (free, no card required):
 Without a key, the pipeline runs fine — `ReasoningAgent` falls back to rule-based classification
 using the dataset's ground-truth `attack_cat`.
 
-Run the pipeline (two terminals):
-```bash
-python infra/log_streamer.py     # feeds sampled network flows, one every 2s
-python main.py                   # detection → reasoning → response, writes infra/soc.db
-```
-
 ### 2. Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev
+cd ..
+```
+(Only needs `npm install` once — the launcher below starts the dev server itself.)
+
+### 3. Run everything with one command
+
+```bash
+python start_soc.py
+```
+Starts the log streamer, the pipeline, and the frontend dev server together, and **Ctrl+C stops
+all three** (kills each process's full tree, including the frontend's node.exe — the fragile
+part on Windows, which a naive multi-terminal setup doesn't handle cleanly).
+
+Open **http://localhost:8080** (auto-bumps to 8081/8082 if that port's taken).
+
+Prefer separate terminals for debugging one stage in isolation? That still works:
+```bash
+python infra/log_streamer.py     # feeds sampled network flows, one every 2s
+python main.py                   # detection → reasoning → response, writes infra/soc.db
+npm --prefix frontend run dev    # (after the npm install above)
 ```
 
-Open **http://localhost:8080**. It reads `../infra/soc.db` directly (no API server, no cloud —
-just a Node server route reading a local SQLite file) and polls every 2 seconds for new rows.
+The frontend reads `../infra/soc.db` directly either way — no API server, no cloud, just a Node
+server route reading a local SQLite file, polling every 2 seconds for new rows.
 
-### 3. Train the detection model (optional — a trained model is already included)
+### 4. Train the detection model (optional — a trained model is already included)
 
 ```bash
 python models/train_model.py     # trains RandomForestClassifier → models/detector.pkl
